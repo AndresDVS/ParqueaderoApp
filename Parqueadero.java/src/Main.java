@@ -44,12 +44,12 @@ public class Main {
         System.out.print("Nombre: ");
         String nombre = sc.nextLine();
         parqueadero.agregarUsuario(nombre);
-        System.out.println("✅ Usuario registrado");
+        System.out.println(" Usuario registrado");
     }
     
     private static void registrarVehiculo() {
         if (parqueadero.getUsuarios().isEmpty()) {
-            System.out.println("❌ Primero registre un usuario");
+            System.out.println("Primero registre un usuario");
             return;
         }
         
@@ -62,7 +62,7 @@ public class Main {
         int idU = Integer.parseInt(sc.nextLine());
         
         if (parqueadero.buscarUsuario(idU) == null) {
-            System.out.println("❌ Usuario no existe");
+            System.out.println(" Usuario no existe");
             return;
         }
         
@@ -166,12 +166,12 @@ public class Main {
         int idR = Integer.parseInt(sc.nextLine());
         
         parqueadero.registrarSalida(idR);
-        System.out.println("✅ Salida registrada");
+        System.out.println(" Salida registrada");
     }
     
     private static void verHistorial() {
         if (parqueadero.getRegistros().isEmpty()) {
-            System.out.println("📭 No hay movimientos");
+            System.out.println(" No hay movimientos");
             return;
         }
         

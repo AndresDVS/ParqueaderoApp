@@ -9,10 +9,17 @@ public class Plaza {
         this.disponible = true;
     }
     
-    public int getId() { return id; }
-    public String getUbicacion() { return ubicacion; }
-    public boolean isDisponible() { return disponible; }
-    public void setDisponible(boolean disponible) { this.disponible = disponible; }
+    public int getId()
+     { return id; }
+     
+    public String getUbicacion()
+     { return ubicacion; }
+
+    public boolean isDisponible() 
+    { return disponible; }
+
+    public void setDisponible(boolean disponible) 
+    { this.disponible = disponible; }
     
     @Override
     public String toString() {
