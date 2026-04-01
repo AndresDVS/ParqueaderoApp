@@ -20,10 +20,11 @@ public class Main {
                 case 6: registrarEntrada(); break;
                 case 7: registrarSalida(); break;
                 case 8: verHistorial(); break;
-                case 9: System.out.println("¡Hasta luego!"); break;
+                case 9: gestionPagosMenu(); break;    // Opción 9: Gestión de Pagos
+                case 10: System.out.println("¡Hasta luego!"); break;  // Opción 10: Salir
                 default: System.out.println("Opción inválida");
             }
-        } while(opcion != 9);
+        } while(opcion != 10);
     }
     
     private static void mostrarMenu() {
@@ -36,7 +37,8 @@ public class Main {
         System.out.println("6. Registrar entrada");
         System.out.println("7. Registrar salida");
         System.out.println("8. Ver historial");
-        System.out.println("9. Salir");
+        System.out.println("9. Gestión de pagos");
+        System.out.println("10. Salir");
         System.out.print("Opción: ");
     }
     
@@ -44,12 +46,12 @@ public class Main {
         System.out.print("Nombre: ");
         String nombre = sc.nextLine();
         parqueadero.agregarUsuario(nombre);
-        System.out.println(" Usuario registrado");
+        System.out.println("✅ Usuario registrado");
     }
     
     private static void registrarVehiculo() {
         if (parqueadero.getUsuarios().isEmpty()) {
-            System.out.println("Primero registre un usuario");
+            System.out.println("❌ Primero registre un usuario");
             return;
         }
         
@@ -62,7 +64,7 @@ public class Main {
         int idU = Integer.parseInt(sc.nextLine());
         
         if (parqueadero.buscarUsuario(idU) == null) {
-            System.out.println(" Usuario no existe");
+            System.out.println("❌ Usuario no existe");
             return;
         }
         
@@ -166,12 +168,12 @@ public class Main {
         int idR = Integer.parseInt(sc.nextLine());
         
         parqueadero.registrarSalida(idR);
-        System.out.println(" Salida registrada");
+        System.out.println("✅ Salida registrada");
     }
     
     private static void verHistorial() {
         if (parqueadero.getRegistros().isEmpty()) {
-            System.out.println(" No hay movimientos");
+            System.out.println("📭 No hay movimientos");
             return;
         }
         
@@ -183,6 +185,143 @@ public class Main {
                              " | Plaza: " + r.getIdPlaza() +
                              " | Entrada: " + r.getEntrada() +
                              " | Salida: " + (r.getSalida() == null ? "---" : r.getSalida()));
+        }
+    }
+    
+    // ========== NUEVOS MÉTODOS PARA GESTIÓN DE PAGOS ==========
+    
+    private static void gestionPagosMenu() {
+        System.out.println("\n--- GESTIÓN DE PAGOS ---");
+        System.out.println("1. Registrar pago mensualidad");
+        System.out.println("2. Ver tarifas");
+        System.out.println("3. Ver historial pagos por usuario");
+        System.out.println("4. Ver historial pagos por vehículo");
+        System.out.println("5. Ver todos los pagos");
+        System.out.print("Opción: ");
+        
+        int subOp = Integer.parseInt(sc.nextLine());
+        
+        switch(subOp) {
+            case 1: registrarPagoMensualidad(); break;
+            case 2: verTarifas(); break;
+            case 3: verHistorialPagosPorUsuario(); break;
+            case 4: verHistorialPagosPorVehiculo(); break;
+            case 5: verTodosLosPagos(); break;
+            default: System.out.println("Opción inválida");
+        }
+    }
+    
+    private static void registrarPagoMensualidad() {
+        if (parqueadero.getVehiculos().isEmpty()) {
+            System.out.println("❌ No hay vehículos registrados");
+            return;
+        }
+        
+        System.out.println("\n--- VEHÍCULOS ---");
+        for (Vehiculo v : parqueadero.getVehiculos()) {
+            Usuario u = parqueadero.buscarUsuario(v.getIdUsuario());
+            System.out.print(v.getId() + ". " + v.getPlaca() + " - Dueño: " + u.getNombre());
+            if (parqueadero.mensualidadActiva(v.getId())) {
+                System.out.println(" ✅ Mensualidad activa este mes");
+            } else {
+                System.out.println(" ⚠️ Sin mensualidad este mes");
+            }
+        }
+        
+        System.out.print("\nID del vehículo: ");
+        int idV = Integer.parseInt(sc.nextLine());
+        
+        Vehiculo v = parqueadero.buscarVehiculo(idV);
+        if (v == null) {
+            System.out.println("❌ Vehículo no existe");
+            return;
+        }
+        
+        if (parqueadero.mensualidadActiva(idV)) {
+            System.out.println("⚠️ Este vehículo YA pagó la mensualidad de este mes");
+            return;
+        }
+        
+        System.out.println("💰 Valor mensualidad: $" + parqueadero.getTarifa().getValorMensual());
+        System.out.print("Confirmar pago (s/n): ");
+        String confirm = sc.nextLine();
+        
+        if (confirm.equalsIgnoreCase("s")) {
+            parqueadero.registrarPago(idV, v.getIdUsuario(), "MENSUALIDAD");
+        } else {
+            System.out.println(" Pago cancelado");
+        }
+    }
+    
+    private static void verTarifas() {
+        System.out.println("\n--- TARIFAS VIGENTES ---");
+        System.out.println("💰 Hora: $" + parqueadero.getTarifa().getValorHora());
+        System.out.println("💰 Mensualidad: $" + parqueadero.getTarifa().getValorMensual());
+    }
+    
+    private static void verHistorialPagosPorUsuario() {
+        if (parqueadero.getUsuarios().isEmpty()) {
+            System.out.println(" No hay usuarios");
+            return;
+        }
+        
+        System.out.println("\n--- USUARIOS ---");
+        for (Usuario u : parqueadero.getUsuarios()) {
+            System.out.println(u.getId() + ". " + u.getNombre());
+        }
+        
+        System.out.print("ID del usuario: ");
+        int idU = Integer.parseInt(sc.nextLine());
+        
+        List<Pago> historial = parqueadero.getHistorialPagosPorUsuario(idU);
+        
+        if (historial.isEmpty()) {
+            System.out.println("📭 No hay pagos registrados para este usuario");
+            return;
+        }
+        
+        System.out.println("\n--- HISTORIAL DE PAGOS ---");
+        for (Pago p : historial) {
+            System.out.println(p);
+        }
+    }
+    
+    private static void verHistorialPagosPorVehiculo() {
+        if (parqueadero.getVehiculos().isEmpty()) {
+            System.out.println("❌ No hay vehículos");
+            return;
+        }
+        
+        System.out.println("\n--- VEHÍCULOS ---");
+        for (Vehiculo v : parqueadero.getVehiculos()) {
+            System.out.println(v.getId() + ". " + v.getPlaca());
+        }
+        
+        System.out.print("ID del vehículo: ");
+        int idV = Integer.parseInt(sc.nextLine());
+        
+        List<Pago> historial = parqueadero.getHistorialPagosPorVehiculo(idV);
+        
+        if (historial.isEmpty()) {
+            System.out.println("📭 No hay pagos registrados para este vehículo");
+            return;
+        }
+        
+        System.out.println("\n--- HISTORIAL DE PAGOS ---");
+        for (Pago p : historial) {
+            System.out.println(p);
+        }
+    }
+    
+    private static void verTodosLosPagos() {
+        if (parqueadero.getPagos().isEmpty()) {
+            System.out.println("📭 No hay pagos registrados");
+            return;
+        }
+        
+        System.out.println("\n--- TODOS LOS PAGOS ---");
+        for (Pago p : parqueadero.getPagos()) {
+            System.out.println(p);
         }
     }
 }

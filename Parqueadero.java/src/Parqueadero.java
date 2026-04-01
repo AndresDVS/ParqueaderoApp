@@ -8,16 +8,21 @@ public class Parqueadero {
     private List<Vehiculo> vehiculos;
     private List<Plaza> plazas;
     private List<Registro> registros;
+    private List<Pago> pagos;
+    private Tarifa tarifa;
     
     private int contadorUsuarios = 1;
     private int contadorVehiculos = 1;
     private int contadorRegistros = 1;
+    private int contadorPagos = 1;
     
     public Parqueadero() {
         usuarios = new ArrayList<>();
         vehiculos = new ArrayList<>();
         plazas = new ArrayList<>();
         registros = new ArrayList<>();
+        pagos = new ArrayList<>();
+        tarifa = new Tarifa();
         
         // Crear plazas iniciales
         plazas.add(new Plaza(1, "Piso 1 - A1"));
@@ -115,5 +120,71 @@ public class Parqueadero {
         }
         return false;
     }
+    
+    // ========== MÉTODOS PARA GESTIÓN DE PAGOS ==========
+    
+    public void registrarPago(int idVehiculo, int idUsuario, String concepto) {
+        double monto = concepto.equals("MENSUALIDAD") ? tarifa.getValorMensual() : 0;
+        
+        if (concepto.equals("MENSUALIDAD") && yaPagoEsteMes(idVehiculo)) {
+            System.out.println("⚠️ Este vehículo ya pagó la mensualidad de este mes");
+            return;
+        }
+        
+        Pago nuevoPago = new Pago(contadorPagos++, idVehiculo, idUsuario, monto, concepto);
+        pagos.add(nuevoPago);
+        System.out.println("✅ Pago registrado: $" + monto);
+    }
+    
+    public boolean yaPagoEsteMes(int idVehiculo) {
+        String mesActual = LocalDateTime.now().format(DateTimeFormatter.ofPattern("MM/yyyy"));
+        for (Pago p : pagos) {
+            if (p.getIdVehiculo() == idVehiculo && 
+                p.getConcepto().equals("MENSUALIDAD") &&
+                p.getFecha().contains(mesActual)) {
+                return true;
+            }
+        }
+        return false;
+    }
+    
+    public List<Pago> getHistorialPagosPorUsuario(int idUsuario) {
+        List<Pago> historial = new ArrayList<>();
+        for (Pago p : pagos) {
+            if (p.getIdUsuario() == idUsuario) {
+                historial.add(p);
+            }
+        }
+        return historial;
+    }
+    
+    public List<Pago> getHistorialPagosPorVehiculo(int idVehiculo) {
+        List<Pago> historial = new ArrayList<>();
+        for (Pago p : pagos) {
+            if (p.getIdVehiculo() == idVehiculo) {
+                historial.add(p);
+            }
+        }
+        return historial;
+    }
+    
+    public boolean mensualidadActiva(int idVehiculo) {
+        String mesActual = LocalDateTime.now().format(DateTimeFormatter.ofPattern("MM/yyyy"));
+        for (Pago p : pagos) {
+            if (p.getIdVehiculo() == idVehiculo && 
+                p.getConcepto().equals("MENSUALIDAD") &&
+                p.getFecha().contains(mesActual)) {
+                return true;
+            }
+        }
+        return false;
+    }
+    
+    public Tarifa getTarifa() { 
+        return tarifa; 
+    }
+    
+    public List<Pago> getPagos() { 
+        return pagos; 
+    }
 }
-
